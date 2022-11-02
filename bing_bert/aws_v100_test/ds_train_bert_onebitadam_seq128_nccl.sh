@@ -15,7 +15,6 @@ mkdir -p $OUTPUT_DIR
 
 # NCCL_IB_DISABLE=1 NCCL_SOCKET_IFNAME=eth0 are used to disable infiniband. Remove it if needed.
 NCCL_TREE_THRESHOLD=0 deepspeed ${base_dir}/../deepspeed_train.py \
-#--cf ${base_dir}/../bert_large.json \
 --cf ${base_dir}/../bert_large_lamb_nvidia_data.json \
 --max_seq_length 128 \
 --output_dir $OUTPUT_DIR \
