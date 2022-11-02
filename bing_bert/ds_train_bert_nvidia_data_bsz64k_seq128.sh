@@ -19,6 +19,6 @@ NCCL_TREE_THRESHOLD=0 deepspeed ${base_dir}/deepspeed_train.py \
 --lr_offset 10e-4 \
 --job_name $JOB_NAME \
 --deepspeed_config ${base_dir}/deepspeed_bsz64k_lamb_config_seq128.json \
---data_path_prefix /workspace/bert \
+--data_path_prefix /home/ubuntu \
 --use_nvidia_dataset \
 &> ${JOB_NAME}.log
