@@ -1,5 +1,5 @@
 {
-  "train_batch_size": 512,
+  "train_batch_size": 16384,
   "train_micro_batch_size_per_gpu": 16,
   "steps_per_print": 32,
   "prescale_gradients": false,

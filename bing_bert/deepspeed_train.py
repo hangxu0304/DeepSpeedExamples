@@ -584,6 +584,7 @@ def run(args, model, optimizer, start_epoch):
 
 
 def main():
+    os.environ['PATH'] += ':/opt/conda/envs/pytorch/bin'
     start = time.time()
     args = construct_arguments()
     model, optimizer = prepare_model_optimizer(args)
