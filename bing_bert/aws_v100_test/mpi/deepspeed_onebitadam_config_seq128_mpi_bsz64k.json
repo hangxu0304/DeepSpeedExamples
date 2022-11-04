@@ -9,7 +9,7 @@
       "lr": 4e-4,
       "weight_decay": 0.01,
       "bias_correction": false,
-      "freeze_step": 10,
+      "freeze_step": 50,
       "cuda_aware": true,
       "comm_backend_name": "mpi"
     }

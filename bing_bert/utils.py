@@ -200,6 +200,14 @@ def get_argument_parser():
                         default=False,
                         action='store_true',
                         help="Whether to enable progressive layer dropping or not")
+    parser.add_argument('--slamb',
+                        default=False,
+                        action='store_true',
+                        help="Whether to use slamb optimizer")
+    parser.add_argument('--compress_ratio',
+                        type=float,
+                        default=0.1,
+                        help="compression ratio for slamb optimizer")
 
     return parser
 

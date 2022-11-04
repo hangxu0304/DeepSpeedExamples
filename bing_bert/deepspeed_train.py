@@ -172,7 +172,10 @@ def train(args,
             # Prefetch training data
             pretrain_dataset_provider.prefetch_batch()
 
-            model.network.backward(loss)
+            if args.slamb:
+                model.network.backward(loss, allreduce_gradients=False)
+            else:
+                model.network.backward(loss)
 
             loss = None
 
@@ -465,10 +468,21 @@ def prepare_model_optimizer(args):
     optimizer_grouped_parameters = prepare_optimizer_parameters(args, model)
 
     # DeepSpeed initializer handles FP16, distributed, optimizer automatically.
-    model.network, optimizer, _, _ = deepspeed.initialize(
-        args=args,
-        model=model.network,
-        model_parameters=optimizer_grouped_parameters)
+    if args.slamb:
+        from optimizer import Slamb_V2
+        slamb_optimizer = Slamb_V2(optimizer_grouped_parameters,
+                                   lr=11e-3, weight_decay=0.01, compress_ratio=args.compress_ratio,
+                          )
+        model.network, optimizer, _, _ = deepspeed.initialize(
+            args=args,
+            optimizer=slamb_optimizer,
+            model=model.network,
+            model_parameters=optimizer_grouped_parameters)
+    else:
+        model.network, optimizer, _, _ = deepspeed.initialize(
+            args=args,
+            model=model.network,
+            model_parameters=optimizer_grouped_parameters)
 
     # Overwrite application configs with DeepSpeed config
     args.train_micro_batch_size_per_gpu = model.network.train_micro_batch_size_per_gpu(
