@@ -229,7 +229,7 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
         batch_time.update(time.time() - end)
         end = time.time()
         total_samples_per_step = config.DATA.BATCH_SIZE * dist.get_world_size()
-        throughput = total_samples_per_step / batch_time
+        throughput = total_samples_per_step / batch_time.val
 
         if idx % config.PRINT_FREQ == 0:
             lr = optimizer.param_groups[0]['lr']
@@ -252,6 +252,7 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
                 writer.add_scalar('train/lr', lr, global_step)
                 writer.add_scalar('train/loss_scale', scaler_meter.val, global_step)
 
+    total_samples_per_step = config.DATA.BATCH_SIZE * dist.get_world_size()
     epoch_time = time.time() - start
     avg_throughput = total_samples_per_step * num_steps / epoch_time
     logger.info(f"EPOCH {epoch} training takes {datetime.timedelta(seconds=int(epoch_time))}, average throughput: {avg_throughput} samples/s")
