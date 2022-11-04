@@ -1,0 +1,68 @@
+# 表示作业的基本信息，自动填充，请勿修改
+[base]
+type = ml-easy-job
+
+# 队列相关
+[resource]
+usergroup = hadoop-hdp
+queue = root.zw05_training_cluster.hadoop-hdpmlp.dense_job
+
+# worker节点相关配置
+[roles]
+workers = 1
+# workers = 2
+# workers = 4
+# workers = 8
+# worker.memory = 81920
+worker.memory = 320000
+# 注意A100最多64, V100最多48
+worker.vcore = 188
+# worker.vcore = 64
+# worker.gcores32g = 2
+worker.gcores80g = 8
+# worker启动后执行的脚本，一般为训练作业的执行命令
+worker.script = sh scripts/run_swin_hope.sh 1 2
+# worker.script = sh scripts/run_swin_hope.sh 1 8
+# worker.script = sh scripts/run_swin_hope.sh 2 8
+# worker.script = sh scripts/run_swin_hope.sh 4 8
+# worker.script = sh scripts/run_swin_hope.sh 8 8
+worker.ports = 1
+
+# tensorboard相关配置
+[tensorboard]
+with.tensor.board = false
+# 需要配置board.log_dir，指定tensorboard events存储路径
+board.log_dir = /mnt/dolphinfs/hdd_pool/docker/user/hadoop-hdp/xuhang12/pytorch_bert/results/
+
+# worker端python脚本的输入参数
+# # 可以设置args.batch_size = 32，则会向worker.script追加参数--batch_size=32
+[user_args]
+
+# docker环境配置
+[docker]
+# afo.docker.image.name = registryonline-hulk.sankuai.com/custom_prod/com.sankuai.data.hadoop.gpu/hadoop-hdp_nv_pytorch_bert-a362a282
+# 数据路径更换到dolphionfs的A100镜像
+# afo.docker.image.name = registryonline-hulk.sankuai.com/custom_prod/com.sankuai.data.hadoop.gpu/data-nv_pytorch1.8_bert_modify_data_path-7ad27d3b
+# swin 镜像
+afo.docker.image.name = registryonline-hulk.sankuai.com/custom_prod/com.sankuai.data.hadoop.gpu/data-hadoop-hdp_pytorch1.8_swin-ee54facf
+# afo.docker.image.name = afo.docker.image.name = registryonline-hulk.sankuai.com/custom_prod/com.sankuai.data.hadoop.gpu/data-hadoop-hdp_pytorch1.8_swinv2-697e4fcc
+# 是否使用预拉取
+[data]
+afo.data.prefetch=false
+
+# 是否支持容错
+[failover]
+afo.app.support.engine.failover=true
+
+# 其它配置参数
+[others]
+# pytorch dataloader可能会用到共享内存，配置需要的共享内存（单位为B）
+afo.app.env.YARN_CONTAINER_RUNTIME_DOCKER_SHM_SIZE_BYTES=343597383680
+afo.app.env.YARN_CONTAINER_RUNTIME_DOCKER_ULIMITS=memlock=30737418240:30737418240
+afo.network.mode=RDMA
+#afo.docker.use.independent.ip=false
+afo.role.worker.env.NCCL_DEBUG=INFO
+#afo.role.worker.env.NCCL_IB_GID_INDEX=3
+# 作业结束后，会通过大象通知用户
+afo.xm.notice.receivers.account=xuhang12@meiutuan.com
+with_requirements = false
