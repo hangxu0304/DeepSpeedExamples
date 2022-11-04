@@ -108,7 +108,7 @@ class Slamb_V2(torch.optim.Optimizer):
             self.multi_tensor_l2norm = amp_C.multi_tensor_l2norm
         else:
             raise RuntimeError('apex.contrib.optimizers.FusedLAMB requires cuda extensions')
-        print("==INFO== SLAMB optimizer is initialized!")
+        print("==INFO== SLAMB optimizer is initialized! Compression ratio: ", self.compress_ratio)
 
     def sync_moment(self):
         if torch.distributed.get_world_size() > 1:

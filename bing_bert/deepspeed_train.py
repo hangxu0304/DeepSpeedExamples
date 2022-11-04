@@ -172,10 +172,7 @@ def train(args,
             # Prefetch training data
             pretrain_dataset_provider.prefetch_batch()
 
-            if args.slamb:
-                model.network.backward(loss, allreduce_gradients=False)
-            else:
-                model.network.backward(loss)
+            model.network.backward(loss)
 
             loss = None
 
@@ -478,6 +475,7 @@ def prepare_model_optimizer(args):
             optimizer=slamb_optimizer,
             model=model.network,
             model_parameters=optimizer_grouped_parameters)
+        model.network.enable_backward_allreduce = False
     else:
         model.network, optimizer, _, _ = deepspeed.initialize(
             args=args,
