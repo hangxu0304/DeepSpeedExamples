@@ -167,16 +167,16 @@ def main(config):
         #     save_checkpoint(config, epoch, model_without_ddp, max_accuracy, optimizer, lr_scheduler, loss_scaler,
         #                     logger)
 
-        acc1, acc5, loss = validate(config, data_loader_val, model)
-        logger.info(f"Accuracy of the network on the {len(dataset_val)} test images: {acc1:.1f}%")
-        max_accuracy = max(max_accuracy, acc1)
-        logger.info(f'Max accuracy: {max_accuracy:.2f}%')
-
-        if writer is not None:
-            writer.add_scalar('test/loss', loss, epoch)
-            writer.add_scalar('test/acc1', acc1, epoch)
-            writer.add_scalar('test/acc5', acc5, epoch)
-            writer.add_scalar('test/acc1_max', max_accuracy, epoch)
+        # acc1, acc5, loss = validate(config, data_loader_val, model)
+        # logger.info(f"Accuracy of the network on the {len(dataset_val)} test images: {acc1:.1f}%")
+        # max_accuracy = max(max_accuracy, acc1)
+        # logger.info(f'Max accuracy: {max_accuracy:.2f}%')
+        #
+        # if writer is not None:
+        #     writer.add_scalar('test/loss', loss, epoch)
+        #     writer.add_scalar('test/acc1', acc1, epoch)
+        #     writer.add_scalar('test/acc5', acc5, epoch)
+        #     writer.add_scalar('test/acc1_max', max_accuracy, epoch)
 
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
@@ -228,6 +228,8 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
         scaler_meter.update(loss_scale_value)
         batch_time.update(time.time() - end)
         end = time.time()
+        total_samples_per_step = config.DATA.BATCH_SIZE * dist.get_world_size()
+        throughput = total_samples_per_step / batch_time
 
         if idx % config.PRINT_FREQ == 0:
             lr = optimizer.param_groups[0]['lr']
@@ -241,7 +243,8 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
                 f'loss {loss_meter.val:.4f} ({loss_meter.avg:.4f})\t'
                 f'grad_norm {norm_meter.val:.4f} ({norm_meter.avg:.4f})\t'
                 f'loss_scale {scaler_meter.val:.4f} ({scaler_meter.avg:.4f})\t'
-                f'mem {memory_used:.0f}MB')
+                f'mem {memory_used:.0f}MB\t'
+                f'throughput {throughput:.2f}samples/s')
             # logger.info(f'Data_loading_time: {data_loading_time:.4f}')
             if writer is not None:
                 global_step = epoch * len(data_loader) + idx
@@ -250,7 +253,8 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
                 writer.add_scalar('train/loss_scale', scaler_meter.val, global_step)
 
     epoch_time = time.time() - start
-    logger.info(f"EPOCH {epoch} training takes {datetime.timedelta(seconds=int(epoch_time))}")
+    avg_throughput = total_samples_per_step * num_steps / epoch_time
+    logger.info(f"EPOCH {epoch} training takes {datetime.timedelta(seconds=int(epoch_time))}, average throughput: {avg_throughput} samples/s")
 
 
 @torch.no_grad()
