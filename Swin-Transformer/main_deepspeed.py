@@ -105,7 +105,7 @@ def main(config):
 
     # manually broadcast parameters for SLAMB
     # check_model_params(model)
-    if opt_lower == 'slamb':
+    if opt_lower == 'slamb' or opt_lower == 'slamb_v2':
         for param in model.parameters():
             dist.broadcast(param, 0)
     else:

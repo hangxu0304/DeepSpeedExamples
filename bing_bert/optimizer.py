@@ -114,10 +114,10 @@ class Slamb_V2(torch.optim.Optimizer):
         if torch.distributed.get_world_size() > 1:
             self.world_size = torch.distributed.get_world_size()
 
-        flat_sub = torch.masked_select(self.flat_m, self.freshness == 1)
+        flat_sub = torch.masked_select(self.flat_m, self.freshness == 1).half()
         torch.distributed.all_reduce(flat_sub)
         flat_sub.data.div_(self.world_size)
-        self.flat_m[self.freshness == 1] = flat_sub
+        self.flat_m[self.freshness == 1] = flat_sub.to(self.flat_m.dtype)
 
     def sync_params(self, p_all):
         if torch.distributed.get_world_size() > 1:
@@ -147,7 +147,7 @@ class Slamb_V2(torch.optim.Optimizer):
                 i += p.numel()
 
             self.freshness.mul_(self.beta3)
-            self.freshness[~flat_mask] = 1.0
+            self.freshness[flat_mask] = 1.0
 
             del flat_mask
 
